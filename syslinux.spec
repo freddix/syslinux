@@ -1,13 +1,25 @@
+%bcond_without  efi32
+%bcond_without  efi64
+
+%ifnarch %{ix86}
+%undefine       with_efi32
+%endif
+
+%ifnarch %{x8664}
+%undefine       with_efi64
+%endif
+
 Summary:	Simple bootloader
 Name:		syslinux
-Version:	4.06
+Version:	6.01
 Release:	1
 License:	GPL
 Group:		Applications/System
 Source0:	ftp://ftp.kernel.org/pub/linux/utils/boot/syslinux/%{name}-%{version}.tar.bz2
-# Source0-md5:	0384ef35b724615074e77b1fc89d5b47
+# Source0-md5:	6945ee89e29119d459baed4937bbc534
 URL:		http://syslinux.zytor.com/
 BuildRequires:	e2fsprogs-devel
+BuildRequires:	gnu-efi
 BuildRequires:	nasm
 BuildRequires:	perl-base
 BuildRequires:	sed >= 4.0
@@ -39,25 +51,23 @@ customized syslinux clients.
 %prep
 %setup -q
 
-sed -i "s|linux/ext2_fs.h|ext2fs/ext2_fs.h|" libinstaller/linuxioctl.h
-
 %build
-rm -f ldlinux.{bin,bss,lst,sys}
-%{__make} -j1 installer \
-	CC="%{__cc}"
+for d in "bios installer" %{?with_efi32:efi32} %{?with_efi64:efi64} ; do
+    %{__make} -j1 $d \
+    CC="%{__cc}"
+done
 
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{%{_bindir},%{_datadir}/%{name},%{_includedir}}
-install core/ldlinux.sys $RPM_BUILD_ROOT%{_datadir}/%{name}
+install bios/core/ldlinux.sys $RPM_BUILD_ROOT%{_datadir}/%{name}
 
-%{__make} -j1 install-all	\
+
+%{__make} -j1 install \
 	INSTALLROOT=$RPM_BUILD_ROOT \
 	LIBDIR=%{_libdir}	\
 	MANDIR=%{_mandir}	\
-	SBINDIR=%{_sbindir}
-
-rm -fr $RPM_BUILD_ROOT/{boot,tftpboot}
+	firmware="bios %{?with_efi32:efi32} %{?with_efi64:efi64}"
 
 %clean
 rm -rf $RPM_BUILD_ROOT
