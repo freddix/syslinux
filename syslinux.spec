@@ -11,12 +11,12 @@
 
 Summary:	Simple bootloader
 Name:		syslinux
-Version:	6.01
+Version:	6.02
 Release:	1
 License:	GPL
 Group:		Applications/System
 Source0:	ftp://ftp.kernel.org/pub/linux/utils/boot/syslinux/%{name}-%{version}.tar.bz2
-# Source0-md5:	6945ee89e29119d459baed4937bbc534
+# Source0-md5:	5410b1c2614cc8375bfc92fe308ca5c8
 URL:		http://syslinux.zytor.com/
 BuildRequires:	e2fsprogs-devel
 BuildRequires:	gnu-efi
@@ -25,6 +25,8 @@ BuildRequires:	perl-base
 BuildRequires:	sed >= 4.0
 Requires:	mtools
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
+
+%define		_noautochrpath	.*%{_datadir}/.*
 
 %description
 SYSLINUX is a boot loader for the Linux operating system which
@@ -62,11 +64,11 @@ rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{%{_bindir},%{_datadir}/%{name},%{_includedir}}
 install bios/core/ldlinux.sys $RPM_BUILD_ROOT%{_datadir}/%{name}
 
-
 %{__make} -j1 install \
 	INSTALLROOT=$RPM_BUILD_ROOT \
 	LIBDIR=%{_libdir}	\
 	MANDIR=%{_mandir}	\
+	SBINDIR=%{_sbindir}	\
 	firmware="bios %{?with_efi32:efi32} %{?with_efi64:efi64}"
 
 %clean
@@ -89,7 +91,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/%{name}/*.exe
 %{_datadir}/%{name}/*.sys
 %{_datadir}/%{name}/memdisk
-
+%if %{with efi32}
+%{_datadir}/%{name}/efi32
+%endif
+%if %{with efi64}
+%{_datadir}/%{name}/efi64
+%endif
 %{_mandir}/man1/*
 
 %files devel
