@@ -1,3 +1,4 @@
+# based on PLD Linux spec git://git.pld-linux.org/packages/syslinux.git
 %bcond_without  efi32
 %bcond_without  efi64
 
@@ -12,7 +13,7 @@
 Summary:	Simple bootloader
 Name:		syslinux
 Version:	6.02
-Release:	1
+Release:	2
 License:	GPL
 Group:		Applications/System
 Source0:	ftp://ftp.kernel.org/pub/linux/utils/boot/syslinux/%{name}-%{version}.tar.bz2
